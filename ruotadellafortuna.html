@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Ruota della Fortuna - Compleanno Speciale!</title>
+    <style>
+        :root {
+            --bg-color: #0f0c1b;
+            --panel-bg: rgba(255, 255, 255, 0.07);
+            --panel-border: rgba(255, 255, 255, 0.15);
+            --accent-pink: #ff2a75;
+            --accent-cyan: #05d9e8;
+            --accent-gold: #ffdd53;
+            --text-light: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c20, #150030, #001230);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid var(--accent-pink);
+            box-shadow: 0 0 20px rgba(255, 42, 117, 0.4);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--accent-pink), 0 0 20px var(--accent-pink);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+            margin-top: 5px;
+            text-shadow: 0 0 5px rgba(5, 217, 232, 0.5);
+        }
+
+        .game-container {
+            width: 95%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            padding-bottom: 5px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .right-panel {
+            flex: 1.5;
+            min-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Glassmorphism Panels */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            width: 100%;
+        }
+
+        /* Wheel Container styling */
+        .wheel-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #wheel-wrapper {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            margin-bottom: 20px;
+        }
+
+        #wheelCanvas {
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), 0 0 15px var(--accent-gold);
+            transform: rotate(0deg);
+            transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 30px solid #ff003c;
+            filter: drop-shadow(0px 4px 5px rgba(0, 0, 0, 0.5));
+            z-index: 10;
+        }
+
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -33px;
+            left: -6px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Stats & Scoreboard */
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            text-align: center;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 20px;
+            min-width: 130px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #aaa;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(255, 221, 83, 0.4);
+        }
+
+        #current-spin-val {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(5, 217, 232, 0.4);
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(90deg, var(--accent-pink), #m01450);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 42, 117, 0.4);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 42, 117, 0.6);
+            background: linear-gradient(90deg, #ff4185, #bd1653);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            background: #444;
+            color: #888;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(90deg, #05d9e8, #0199a4);
+            box-shadow: 0 4px 15px rgba(5, 217, 232, 0.3);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: linear-gradient(90deg, #39e3f0, #02adb9);
+            box-shadow: 0 6px 20px rgba(5, 217, 232, 0.5);
+        }
+
+        /* Board / Puzzle Styling */
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 200px;
+            justify-content: center;
+        }
+
+        .category-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            color: var(--accent-cyan);
+            border: 1px solid rgba(5, 217, 232, 0.3);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .puzzle-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .puzzle-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .tile {
+            width: 42px;
+            height: 52px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            user-select: none;
+            transition: all 0.5s transform;
+            position: relative;
+        }
+
+        .tile.active-letter {
+            background: #fff;
+            color: #000;
+            border-color: #ccc;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .tile.hidden-letter {
+            background: radial-gradient(circle, #016275 0%, #003642 100%);
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(5, 217, 232, 0.3);
+            color: transparent;
+        }
+
+        .tile.space {
+            background: transparent;
+            border: none;
+            width: 20px;
+        }
+
+        /* Keyboard layout */
+        .keyboard-box h3 {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .key:hover:not(:disabled) {
+            background: var(--accent-cyan);
+            color: black;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(5, 217, 232, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .key:disabled {
+            background: rgba(0, 0, 0, 0.4);
+            color: #555;
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+        }
+
+        .key.correct {
+            background: #00cc66 !important;
+            color: white !important;
+            border-color: #00cc66 !important;
+        }
+
+        .key.wrong {
+            background: #ff3333 !important;
+            color: white !important;
+            border-color: #ff3333 !important;
+        }
+
+        /* Game Status Messages */
+        .status-message {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--accent-pink);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Modals and Overlays */
+        #welcome-screen,
+        #win-screen,
+        #solve-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 5, 25, 0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .solve-input-field {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            margin-bottom: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .solve-input-field:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.4);
+        }
+
+        .solve-error-msg {
+            color: var(--accent-pink);
+            font-weight: bold;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            text-shadow: 0 0 10px rgba(255, 42, 117, 0.4);
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1f1235, #110524);
+            border: 2px solid var(--accent-pink);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 550px;
+            box-shadow: 0 0 40px rgba(255, 42, 117, 0.5);
+        }
+
+        .modal-content h2 {
+            font-size: 2.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(255, 221, 83, 0.4);
+        }
+
+        .modal-content p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+
+        .modal-content .cake-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Action bar for solving */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Confetti canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        @media (max-width: 950px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .left-panel,
+            .right-panel {
+                max-width: 100%;
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Welcome Modal Screen -->
+    <div id="welcome-screen">
+        <div class="modal-content">
+            <span class="cake-icon">🎉🎂</span>
+            <h2>QUIZZETTONEEEE!!!</h2>
+            <p style="color: var(--accent-cyan); font-weight: bold; letter-spacing: 1px;">RUOTA DELLA FORTUNA <br>
+                EDIZIONE SPECIALE COMPLEANNO</p>
+            <p>Preparati a giocare! Gira la coloratissima ruota televisiva, accumula punti nel montepremi e indovina le
+                frasi misteriose dedicate a una persona davvero speciale.</p>
+            <button class="btn" onclick="startGame()">Inizia la Partita</button>
+        </div>
+    </div>
+
+    <!-- Win Modal Screen -->
+    <div id="win-screen" class="hidden">
+        <div class="modal-content">
+            <span class="cake-icon">👑✨</span>
+            <h2 id="win-title">Vittoria Super!</h2>
+            <p id="win-msg"></p>
+            <div class="stat-card" style="margin: 0 auto 25px auto; width: fit-content;">
+                <div class="stat-label">Montepremi Finale</div>
+                <div class="stat-value" id="final-score">0 €</div>
+            </div>
+            <button class="btn btn-secondary" id="next-round-btn" onclick="nextRound()">Prossima Frase</button>
+        </div>
+    </div>
+
+    <!-- Solve Modal Screen -->
+    <div id="solve-screen" class="hidden">
+        <div class="modal-content">
+            <span class="cake-icon">💡🔍</span>
+            <h2>Risolvi la Frase</h2>
+            <p id="solve-instruction" style="color: var(--accent-cyan); font-weight: bold; letter-spacing: 1px;">
+                Inserisci la frase completa</p>
+            <input type="text" id="solve-input" class="solve-input-field" placeholder="Scrivi qui la frase..."
+                autocomplete="off" onkeydown="if(event.key === 'Enter') submitSolve()">
+            <div id="solve-error" class="solve-error-msg hidden"></div>
+
+            <div id="solve-normal-buttons" style="display: flex; gap: 15px; justify-content: center; width: 100%;">
+                <button class="btn" onclick="submitSolve()">Invia</button>
+                <button class="btn btn-secondary" onclick="closeSolveModal()">Annulla</button>
+            </div>
+            <div id="solve-close-button" class="hidden" style="width: 100%;">
+                <button class="btn" onclick="closeSolveModal()">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <h1>La Ruota della Fortuna</h1>
+        <p>Edizione speciale... Compleanno Matta 🎁</p>
+    </header>
+
+    <div class="game-container">
+
+        <!-- LEFT COLUMN: WHEEL & SCOREBOARD -->
+        <div class="left-panel">
+
+            <div class="panel wheel-box">
+                <div id="wheel-wrapper">
+                    <div class="pointer"></div>
+                    <canvas id="wheelCanvas" width="340" height="340"></canvas>
+                </div>
+                <button class="btn" id="spin-btn" onclick="spinWheel()">Gira la Ruota!</button>
+            </div>
+
+            <div class="panel scoreboard">
+                <div class="stat-card">
+                    <div class="stat-label">Spicchio Ruota</div>
+                    <div class="stat-value" id="current-spin-val">---</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Montepremi</div>
+                    <div class="stat-value" id="total-score-val">0 €</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: PUZZLE, STATUS & KEYBOARD -->
+        <div class="right-panel">
+
+            <!-- Puzzle Board -->
+            <div class="panel board-container">
+                <div class="category-tag" id="category-display">Categoria: ???</div>
+                <div class="puzzle-grid" id="puzzle-display-grid">
+                    <!-- Dynamic Tiles go here -->
+                </div>
+            </div>
+
+            <!-- Context Status Message -->
+            <div class="status-message" id="status-text">
+                Benvenuto! Clicca su "Gira la Ruota!" per iniziare il tuo turno e scoprire quanti punti vale ogni
+                lettera!
+            </div>
+
+            <!-- Virtual Keyboard -->
+            <div class="panel keyboard-box">
+                <h3>Scegli una Lettera</h3>
+                <div class="keyboard" id="virtual-keyboard">
+                    <!-- Dynamic letter keys A-Z -->
+                </div>
+            </div>
+
+            <!-- Direct Solve Input -->
+            <div class="action-bar">
+                <button class="btn btn-secondary" onclick="promptSolve()">Risolvi l'intera frase!</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Game configuration and phrases
+        const phrasesData = [
+            { phrase: "LO è IL CANE DELLA MATTA", category: "Bello" },
+            { phrase: "SEI LA MIGLIORE AMICA DEL MONDO", category: "Verità" },
+            { phrase: "UN ANNO PIU VECCHIA MA SEMPRE MATTA", category: "Ironia e Risate" },
+            { phrase: "GIOCO DI RUOLO IN CUI IL TUO MIGLIORE AMICO è SCARSO", category: "Monopoly" },
+            { phrase: "SOLITAMENTE LO è GERRY SCOTTI IN QUESTO GIOCO", category: "Presentatore" },
+            { phrase: "BUON COMPLEANNO MATTA", category: "Auguri Speciali" }
+        ];
+
+        let currentRoundIndex = 0;
+        let totalScore = 0;
+        let currentSpinValue = null;
+        let hasSpunThisTurn = false;
+        let guessedLetters = new Set();
+        let currentPhrase = "";
+        let currentCategory = "";
+
+        // Wheel configuration
+        const wheelSegments = [200, 500, "PASSA", 300, 1000, "BANCAROTTA", 400, 1500, "BONUS", 100, 600, 800];
+        const segmentColors = [
+            "#ff3366", "#33ff66", "#3366ff", "#ffcc00",
+            "#ff6633", "#990000", "#33ffff", "#ff33cc",
+            "#ffdd53", "#a333ff", "#2a9d8f", "#e76f51"
+        ];
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const numSegments = wheelSegments.length;
+        const anglePerSegment = (2 * Math.PI) / numSegments;
+        let wheelRotationAngle = 0;
+
+        // Web Audio Context synth engine for pure self-contained effects
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(freq, type, duration, volume = 0.1) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { console.log(e); }
+        }
+
+        function triggerWinChime() {
+            playSound(523.25, 'sine', 0.15); // C5
+            setTimeout(() => playSound(659.25, 'sine', 0.15), 120); // E5
+            setTimeout(() => playSound(783.99, 'sine', 0.15), 240); // G5
+            setTimeout(() => playSound(1046.50, 'sine', 0.4), 360); // C6
+        }
+
+        function triggerLoseSound() {
+            playSound(180, 'sawtooth', 0.4, 0.15);
+        }
+
+        function triggerTickSound() {
+            playSound(400, 'triangle', 0.03, 0.05);
+        }
+
+        // Draw static wheel initially
+        function drawWheel(angleOffset = 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const radius = canvas.width / 2;
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(angleOffset);
+
+            for (let i = 0; i < numSegments; i++) {
+                // Segment slice
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius - 8, i * anglePerSegment, (i + 1) * anglePerSegment);
+                ctx.fillStyle = segmentColors[i];
+                ctx.fill();
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = "#ffffff";
+                ctx.stroke();
+
+                // Text rendering
+                ctx.save();
+                ctx.rotate(i * anglePerSegment + anglePerSegment / 2);
+                ctx.fillStyle = (segmentColors[i] === "#ffdd53" || segmentColors[i] === "#33ffff" || segmentColors[i] === "#33ff66") ? "#111" : "#fff";
+
+                let text = wheelSegments[i];
+                if (typeof text === 'number') text = text + " €";
+
+                // Make font smaller for long words
+                ctx.font = typeof wheelSegments[i] === 'string' ? "bold 10px sans-serif" : "bold 13px sans-serif";
+                ctx.textAlign = "right";
+                ctx.fillText(text, radius - 25, 5);
+                ctx.restore();
+            }
+            ctx.restore();
+
+            // Center gold ring
+            ctx.beginPath();
+            ctx.arc(radius, radius, 22, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = varColor('--accent-gold');
+            ctx.stroke();
+
+            // Center small inner dot
+            ctx.beginPath();
+            ctx.arc(radius, radius, 8, 0, 2 * Math.PI);
+            ctx.fillStyle = varColor('--accent-pink');
+            ctx.fill();
+
+            // Outer shining border
+            ctx.beginPath();
+            ctx.arc(radius, radius, radius - 4, 0, 2 * Math.PI);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = varColor('--accent-gold');
+            ctx.stroke();
+        }
+
+        function varColor(varName) {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        }
+
+        // Initialize and Start Game
+        function startGame() {
+            initAudio();
+            document.getElementById('welcome-screen').classList.add('hidden');
+            loadRound(0);
+        }
+
+        function loadRound(index) {
+            if (index >= phrasesData.length) {
+                // Game completely finished!
+                document.getElementById('win-screen').classList.remove('hidden');
+                document.getElementById('win-title').innerText = "Vittoria reale! 🏆 (si esatto come su fortnite ai vecchi tempi)";
+                document.getElementById('win-msg').innerText = "Hai completato tutti i tabelloni del compleanno! Sei la campionessa indiscussa della Ruota della Fortuna!";
+                document.getElementById('next-round-btn').classList.add('hidden');
+                return;
+            }
+
+            currentRoundIndex = index;
+            currentPhrase = phrasesData[index].phrase.toUpperCase();
+            currentCategory = phrasesData[index].category;
+            guessedLetters.clear();
+            currentSpinValue = null;
+            hasSpunThisTurn = false;
+
+            document.getElementById('current-spin-val').innerText = "---";
+            document.getElementById('category-display').innerText = "Categoria: " + currentCategory;
+            document.getElementById('status-text').innerText = "Nuovo tabellone pronto! Per prima cosa, gira la ruota per scoprire il valore dei punti in palio.";
+
+            enableKeyboard(false);
+            document.getElementById('spin-btn').disabled = false;
+
+            buildPuzzleBoard();
+            buildKeyboard();
+            drawWheel(wheelRotationAngle);
+        }
+
+        // Create HTML puzzle grid layout nicely broken into single words
+        function buildPuzzleBoard() {
+            const gridContainer = document.getElementById('puzzle-display-grid');
+            gridContainer.innerHTML = "";
+
+            const words = currentPhrase.split(" ");
+            let currentRow = document.createElement('div');
+            currentRow.className = "puzzle-row";
+
+            words.forEach((word, wIdx) => {
+                // If a word is long and row has elements, we can decide to break or let natural wrap happen
+                // For optimal look, we group letters of a word together
+                const wordContainer = document.createElement('div');
+                wordContainer.style.display = "flex";
+                wordContainer.style.marginRight = "15px";
+                wordContainer.style.marginBottom = "5px";
+
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
+                    const tile = document.createElement('div');
+
+                    if (/[A-Z]/.test(char)) {
+                        tile.className = "tile hidden-letter";
+                        tile.dataset.letter = char;
+                        tile.innerText = char;
+                    } else {
+                        // Special characters if any
+                        tile.className = "tile active-letter";
+                        tile.innerText = char;
+                    }
+                    wordContainer.appendChild(tile);
+                }
+
+                currentRow.appendChild(wordContainer);
+            });
+
+            gridContainer.appendChild(currentRow);
+        }
+
+        // Build interactive keyboard
+        function buildKeyboard() {
+            const keyboardContainer = document.getElementById('virtual-keyboard');
+            keyboardContainer.innerHTML = "";
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+            for (let i = 0; i < letters.length; i++) {
+                const button = document.createElement('button');
+                button.className = "key";
+                button.innerText = letters[i];
+                button.id = "key-" + letters[i];
+                button.onclick = () => guessLetter(letters[i]);
+                keyboardContainer.appendChild(button);
+            }
+        }
+
+        function enableKeyboard(enable) {
+            const keys = document.querySelectorAll('.key');
+            keys.forEach(k => {
+                const char = k.innerText;
+                if (enable) {
+                    if (!guessedLetters.has(char)) {
+                        k.disabled = false;
+                    }
+                } else {
+                    k.disabled = true;
+                }
+            });
+        }
+
+        // Spin logic animation
+        function spinWheel() {
+            if (hasSpunThisTurn) return;
+
+            initAudio();
+            document.getElementById('spin-btn').disabled = true;
+            enableKeyboard(false);
+
+            // Calculate a beautiful random spin
+            const extraSpins = 3 + Math.floor(Math.random() * 3); // 3 to 5 full loops
+            const targetSegment = Math.floor(Math.random() * numSegments);
+
+            // Pointer is at the top (-90 deg or 3*PI/2)
+            // To land targetSegment at the top, the canvas rotation must place the segment center at 270 deg.
+            const targetAngle = (extraSpins * 2 * Math.PI) + (3 * Math.PI / 2) - (targetSegment * anglePerSegment + anglePerSegment / 2);
+
+            const startAngle = wheelRotationAngle;
+            const diffAngle = targetAngle - startAngle;
+            const duration = 3500; // 3.5 seconds
+            const startTime = performance.now();
+
+            let lastTickSegment = -1;
+
+            function animateWheel(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Cubic ease-out formula
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                wheelRotationAngle = startAngle + diffAngle * easeOut;
+
+                drawWheel(wheelRotationAngle);
+
+                // Sound effect ticking when crossing segment borders
+                const currentAbsoluteLocalPointer = (3 * Math.PI / 2 - wheelRotationAngle) % (2 * Math.PI);
+                const normalizedLocal = currentAbsoluteLocalPointer < 0 ? currentAbsoluteLocalPointer + 2 * Math.PI : currentAbsoluteLocalPointer;
+                const currentSegIdx = Math.floor(normalizedLocal / anglePerSegment);
+                if (currentSegIdx !== lastTickSegment && progress < 0.95) {
+                    triggerTickSound();
+                    lastTickSegment = currentSegIdx;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateWheel);
+                } else {
+                    finalizeSpin(targetSegment);
+                }
+            }
+
+            requestAnimationFrame(animateWheel);
+        }
+
+        function finalizeSpin(segmentIndex) {
+            hasSpunThisTurn = true;
+            currentSpinValue = wheelSegments[segmentIndex];
+
+            const spinDisplay = document.getElementById('current-spin-val');
+            const statusText = document.getElementById('status-text');
+
+            if (typeof currentSpinValue === 'number') {
+                spinDisplay.innerText = currentSpinValue + " €";
+                statusText.innerText = `La ruota si ferma su ${currentSpinValue} €! Scegli ora una lettera dal pannello sotto. Se indovini, vincerai questa cifra moltiplicata per quante volte appare la lettera!`;
+                enableKeyboard(true);
+            } else if (currentSpinValue === "BONUS") {
+                spinDisplay.innerText = "BONUS";
+                statusText.innerText = "Favoloso! Hai beccato il BONUS! Ogni lettera indovinata varrà ben 2.500 €! Seleziona una lettera!";
+                enableKeyboard(true);
+            } else if (currentSpinValue === "PASSA") {
+                spinDisplay.innerText = "PASSA";
+                statusText.innerText = "Peccato, è uscito PASSA TURNO. Devi rigirare nuovamente la ruota per continuare a giocare!";
+                triggerLoseSound();
+                hasSpunThisTurn = false;
+                document.getElementById('spin-btn').disabled = false;
+            } else if (currentSpinValue === "BANCAROTTA") {
+                spinDisplay.innerText = "BANCAROTTA";
+                totalScore = 0;
+                document.getElementById('total-score-val').innerText = "0 €";
+                statusText.innerText = "Nooo! BANCAROTTA! Il tuo montepremi si azzera totalmente! Gira di nuovo la ruota per ripartire.";
+                triggerLoseSound();
+                hasSpunThisTurn = false;
+                document.getElementById('spin-btn').disabled = false;
+            }
+        }
+
+        // Guess a specific letter
+        function guessLetter(letter) {
+            if (!hasSpunThisTurn || guessedLetters.has(letter)) return;
+
+            guessedLetters.add(letter);
+            const keyButton = document.getElementById("key-" + letter);
+
+            // Find occurrences on the board
+            const tiles = document.querySelectorAll(`.tile[data-letter="${letter}"]`);
+            const count = tiles.length;
+
+            if (count > 0) {
+                // Correct guess
+                keyButton.classList.add('correct');
+                triggerWinChime();
+
+                // Animate and reveal tiles
+                tiles.forEach(tile => {
+                    tile.classList.remove('hidden-letter');
+                    tile.classList.add('active-letter');
+                    tile.style.transform = "scale(1.1)";
+                    setTimeout(() => tile.style.transform = "scale(1)", 200);
+                });
+
+                // Calculate winnings
+                let valueMultiplier = typeof currentSpinValue === 'number' ? currentSpinValue : 2500; // Bonus counts as 2500
+                const roundWinnings = valueMultiplier * count;
+                totalScore += roundWinnings;
+                document.getElementById('total-score-val').innerText = totalScore + " €";
+
+                document.getElementById('status-text').innerText = `Ottimo colpo! La lettera '${letter}' è presente ben ${count} ${count === 1 ? 'volta' : 'volte'}. Guadagni +${roundWinnings} €! Gira di nuovo la ruota per la prossima mossa.`;
+
+                // Check if puzzle is fully solved
+                checkPuzzleSolved();
+            } else {
+                // Wrong guess
+                keyButton.classList.add('wrong');
+                triggerLoseSound();
+                document.getElementById('status-text').innerText = `Mmm, no! La lettera '${letter}' non è presente nel tabellone. Non scoraggiarti, gira di nuovo la ruota e riprova!`;
+            }
+
+            // Reset turn state regardless, forcing a new spin
+            hasSpunThisTurn = false;
+            enableKeyboard(false);
+            document.getElementById('spin-btn').disabled = false;
+        }
+
+        // Direct full puzzle solution phrase guess
+        function promptSolve() {
+            initAudio();
+
+            // Reset modal state
+            const solveInput = document.getElementById('solve-input');
+            const solveError = document.getElementById('solve-error');
+            const solveNormalButtons = document.getElementById('solve-normal-buttons');
+            const solveCloseButton = document.getElementById('solve-close-button');
+            const solveInstruction = document.getElementById('solve-instruction');
+
+            solveInput.value = "";
+            solveInput.classList.remove('hidden');
+            solveError.classList.add('hidden');
+            solveError.innerText = "";
+            solveNormalButtons.classList.remove('hidden');
+            solveCloseButton.classList.add('hidden');
+            solveInstruction.classList.remove('hidden');
+
+            // Show modal
+            document.getElementById('solve-screen').classList.remove('hidden');
+            setTimeout(() => {
+                solveInput.focus();
+            }, 100);
+        }
+
+        function closeSolveModal() {
+            document.getElementById('solve-screen').classList.add('hidden');
+        }
+
+        function submitSolve() {
+            const solveInput = document.getElementById('solve-input');
+            const guess = solveInput.value;
+            if (!guess || guess.trim() === "") return;
+
+            const normalizedGuess = guess.toUpperCase().trim().replace(/\s+/g, ' ');
+            const normalizedActual = currentPhrase.trim().replace(/\s+/g, ' ');
+
+            if (normalizedGuess === normalizedActual) {
+                // Instantly reveal all tiles
+                const tiles = document.querySelectorAll('.tile.hidden-letter');
+                tiles.forEach(tile => {
+                    tile.classList.remove('hidden-letter');
+                    tile.classList.add('active-letter');
+                });
+
+                // Give a sweet bonus for direct solving
+                totalScore += 2000;
+                document.getElementById('total-score-val').innerText = totalScore + " €";
+
+                closeSolveModal();
+                triggerWinPhrase(true);
+            } else {
+                // Show custom error style in the modal
+                const solveError = document.getElementById('solve-error');
+                const solveNormalButtons = document.getElementById('solve-normal-buttons');
+                const solveCloseButton = document.getElementById('solve-close-button');
+                const solveInstruction = document.getElementById('solve-instruction');
+
+                solveInput.classList.add('hidden');
+                solveInstruction.classList.add('hidden');
+                solveError.innerText = "Oops! La frase inserita non è corretta! Continua a girare la ruota.";
+                solveError.classList.remove('hidden');
+
+                solveNormalButtons.classList.add('hidden');
+                solveCloseButton.classList.remove('hidden');
+
+                document.getElementById('status-text').innerText = "Tentativo di soluzione errato! La frase non era quella. Gira di nuovo la ruota!";
+                triggerLoseSound();
+            }
+        }
+
+        function checkPuzzleSolved() {
+            const hiddenTiles = document.querySelectorAll('.tile.hidden-letter');
+            if (hiddenTiles.length === 0) {
+                setTimeout(() => {
+                    triggerWinPhrase(false);
+                }, 600);
+            }
+        }
+
+        function triggerWinPhrase(solvedDirectly) {
+            confettiActive = true;
+            startConfetti();
+            triggerWinChime();
+
+            const winModal = document.getElementById('win-screen');
+            const winMsg = document.getElementById('win-msg');
+            document.getElementById('final-score').innerText = totalScore + " €";
+
+            if (solvedDirectly) {
+                winMsg.innerText = `Grandiosa! Hai risolto direttamente l'intero tabellone ottenendo un super bonus di +2.000 €!`;
+            } else {
+                winMsg.innerText = `Congratulazioni! Hai scoperto tutte le lettere del tabellone completando con successo questo enigma!`;
+            }
+
+            winModal.classList.remove('hidden');
+        }
+
+        function nextRound() {
+            confettiActive = false;
+            cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            document.getElementById('win-screen').classList.add('hidden');
+            loadRound(currentRoundIndex + 1);
+        }
+
+        // --- CONFETTI EFFECT GENERATOR SYSTEM ---
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const cCtx = confettiCanvas.getContext('2d');
+        let particles = [];
+        let confettiActive = false;
+
+        function resizeConfetti() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfetti);
+        resizeConfetti();
+
+        class ConfettiParticle {
+            constructor() {
+                this.x = Math.random() * confettiCanvas.width;
+                this.y = Math.random() * confettiCanvas.height - confettiCanvas.height;
+                this.size = Math.random() * 8 + 6;
+                this.color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                this.speedX = Math.random() * 4 - 2;
+                this.speedY = Math.random() * 4 + 4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 6 - 3;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                if (this.y > confettiCanvas.height) {
+                    this.y = -20;
+                    this.x = Math.random() * confettiCanvas.width;
+                }
+            }
+            draw() {
+                cCtx.save();
+                cCtx.translate(this.x, this.y);
+                cCtx.rotate(this.rotation * Math.PI / 180);
+                cCtx.fillStyle = this.color;
+                cCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                cCtx.restore();
+            }
+        }
+
+        function startConfetti() {
+            particles = [];
+            for (let i = 0; i < 120; i++) {
+                particles.push(new ConfettiParticle());
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            if (!confettiActive) return;
+            cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateConfetti);
+        }
+
+        // Initialize empty wheel layout frame on load
+        window.onload = () => {
+            drawWheel(0);
+        };
+    </script>
+</body>
+
+</html>
